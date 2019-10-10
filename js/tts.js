@@ -1,5 +1,4 @@
 /*
-	uses jQuery
 */
 
 $(document).ready(function() {
@@ -83,8 +82,8 @@ $(document).ready(function() {
 			orientation: 'mendatar',
 			no: 10,
 			startx: 2,
-			starty: 10
-		},
+			starty: 9
+		}
 	],
 		tableWidth = 10,
 		tableHeight = 11
@@ -117,9 +116,10 @@ $(document).ready(function() {
 		$("td").filter('[data-coord="' + startx + "," + y + '"' +"]").append("<span>" + no + "</span>");
 		for (var i=startx; i<length+startx; i++){
 			cell = $("td").filter('[data-coord="' + i + "," + y + '"' +"]");
+			console.log(no)
 			if (!cell.find("input").length) {
-				console.log(cell.find("input").length);
 				cell.append(input);
+				console.log(no)
 			}
 			cell.addClass('entry-' + no)
 		}
