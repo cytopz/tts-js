@@ -70,7 +70,7 @@ $(document).ready(function() {
 		},
 		{
 			clue: 'f(f(x)).',
-			answer: 'shell',
+			answer: 'rekursi',
 			orientation: 'mendatar',
 			no: 8,
 			startx: 0,
@@ -85,15 +85,15 @@ $(document).ready(function() {
 			starty: 9
 		}
 	],
-		tableWidth = 10,
+		tableWidth = 11,
 		tableHeight = 11
 
 	function makeTable() {
 		table = "<table><tbody>"
-		for (var row=0; row<tableWidth; row++) {
+		for (var col=0; col<tableWidth; col++) {
 			table += "<tr>"
-			for(var col=0; col<tableHeight; col++) {
-				table += "<td data-coord=" + col + "," + row + "></td>"
+			for(var row=0; row<tableHeight; row++) {
+				table += "<td data-coord=" + row + "," + col + "></td>"
 			}
 			table += "</tr>"
 		}
@@ -116,10 +116,8 @@ $(document).ready(function() {
 		$("td").filter('[data-coord="' + startx + "," + y + '"' +"]").append("<span>" + no + "</span>");
 		for (var i=startx; i<length+startx; i++){
 			cell = $("td").filter('[data-coord="' + i + "," + y + '"' +"]");
-			console.log(no)
 			if (!cell.find("input").length) {
 				cell.append(input);
-				console.log(no)
 			}
 			cell.addClass('entry-' + no)
 		}
@@ -161,7 +159,6 @@ $(document).ready(function() {
 			if (answer.join('').toLowerCase() == obj.answer) {
 				correctElement = input.parent().attr("class");
 				input.addClass('correct');
-				$('.' + correctElement).addClass('correct');
 			}
 		});
 	}
