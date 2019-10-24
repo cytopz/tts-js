@@ -182,6 +182,7 @@ $(document).ready(function() {
 			})
 		});
 		$("#score").append("Score : " + correctAnswers);	
+		$("#talukButton").prop("disabled", true);
 	}
 
 	function checkAnswer() {
