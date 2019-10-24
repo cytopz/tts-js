@@ -159,12 +159,14 @@ $(document).ready(function() {
 		});
 
 		$("#talukButton").on('click', function() {
+			$(".highlighted").removeClass("highlighted");
 			fillAnswer();
 		});
 	}
 
 	function fillAnswer() {
 		entries = $("li:not(.correct)");
+		console.log(entries);
 		$.each(entries, function(idx, obj) {
 			currEntry = $(obj).attr("class").split("-")[1];
 			$.each(ttsData, function(i, data) {
@@ -179,6 +181,7 @@ $(document).ready(function() {
 				})
 			})
 		});
+		$("#score").append("Score : " + correctAnswers);	
 	}
 
 	function checkAnswer() {
@@ -196,8 +199,13 @@ $(document).ready(function() {
 				correctAnswers = $("li.correct").length
 			}
 			if (correctAnswers >= 3) {
-				console.log(correctAnswers);
-				console.log($("#talukButton").prop("disabled", false));
+				$("#talukButton").prop("disabled", false);
+			}
+
+			if (correctAnswers == ttsData.length) {
+				$("#score").append("Score : " + correctAnswers);
+				$("#talukButton").prop("disabled", true);
+				return false;
 			}
 		});
 	}
@@ -273,7 +281,6 @@ $(document).ready(function() {
 			$(nextInput).val('');
 		}
 		else if (e.which <= 90 && e.which >= 65) {
-			console.log(String.fromCharCode(e.keyCode), new Date());
 			nextInput = (orientation == "mendatar") ? traverseInput(orientation, x, y, 1) : traverseInput(orientation, x, y, 1);
 			if (nextInput.hasClass("correct")) {
 				nextInput = (orientation == "mendatar") ? traverseInput(orientation, x, y, 2) : traverseInput(orientation, x, y, 2);
@@ -281,6 +288,7 @@ $(document).ready(function() {
 		}
 		else {
 			nextInput = $("input:focus");
+			$(nextInput).val('');
 		}
 		$(nextInput).focus();
 	}
