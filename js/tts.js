@@ -86,7 +86,10 @@ $(document).ready(function() {
 		}
 	],
 		tableWidth = 11,
-		tableHeight = 11
+		tableHeight = 11,
+		highlightActive = false,
+		currentHighlightedInput = [],
+		correctAnswers = 0;
 
 	function makeTable() {
 		table = "<table><tbody>"
@@ -145,8 +148,36 @@ $(document).ready(function() {
 	}
 
 	function eventListener() {
-		$("input").on('keyup', function () {
+		$("input").on('keyup', function (e) {
 			checkAnswer();	
+			navigateCursor(e);
+		});
+
+		$("input").on('click', function () {
+			highlightAnswer($(this));	
+			getHighlightedInput($(this).attr("class"));
+		});
+
+		$("#talukButton").on('click', function() {
+			fillAnswer();
+		});
+	}
+
+	function fillAnswer() {
+		entries = $("li:not(.correct)");
+		$.each(entries, function(idx, obj) {
+			currEntry = $(obj).attr("class").split("-")[1];
+			$.each(ttsData, function(i, data) {
+				if(currEntry != data.no) {
+					return;
+				}
+				answer = data.answer.split('');
+				inputs = $("td.entry-" + currEntry).children("input");
+				$.each(answer, function(i, letter) {
+					$(inputs[i]).val(letter);
+					$(inputs[i]).prop("disabled", true);
+				})
+			})
 		});
 	}
 
@@ -157,10 +188,106 @@ $(document).ready(function() {
 				return $(this).val();
 			}).get();
 			if (answer.join('').toLowerCase() == obj.answer) {
-				correctElement = input.parent().attr("class");
-				input.addClass('correct');
+				$(".entry-" + obj.no).addClass("correct");
+				input.addClass("correct")
+				input.prop('disabled', true);
+				input.removeClass("highlighted");
+				$(".entry-" + obj.no).removeClass("highlighted");
+				correctAnswers = $("li.correct").length
+			}
+			if (correctAnswers >= 3) {
+				console.log(correctAnswers);
+				console.log($("#talukButton").prop("disabled", false));
 			}
 		});
+	}
+
+	function highlightAnswer(input) {
+		var className = getHighlightedInputClass(input);
+		if (highlightActive) {
+			$(".highlighted").removeClass("highlighted");
+			highlightActive = false;
+			currentHighlightedInput.length = 0;
+		}
+		$("." + className).each(function (idx, obj) {
+			$(this).children().filter("input:not(.correct)").addClass("highlighted");
+			$(this).addClass("highlighted");
+			highlightActive = true;
+		});
+	}
+
+	function getHighlightedInputClass(input) {
+		var className;
+		if (input.siblings("span").text() > 0) {
+			className = "entry-" + input.siblings("span").text();
+		}
+		else {
+			className = input.parent().attr("class").split(' ')[0];
+		}
+		return className;
+	}
+
+	function getCurrentOrientation(input) {
+		var entry,
+			orientation
+		entry = getHighlightedInputClass(input);
+		$.each(ttsData, function(idx, obj) {
+			if (obj.no == entry.split('-')[1]) {
+				orientation = obj.orientation;
+				return false;
+			}
+		});
+		return orientation;
+	}
+
+	function getHighlightedInput(className) {
+		$("." + className).each(function(idx, obj) {
+			input = $(obj).children("input");
+			if (input.length > 0 && input.hasClass("highlighted")) {
+				currentHighlightedInput.push(input);
+			}
+		})
+	}
+
+	function getCurrentCursorPos() {
+		pos = $("input:focus").parent().attr('data-coord');
+		try {
+			return pos.split(',');
+		} catch (TypeErrror) {
+			return '';
+		}
+	}
+
+	function navigateCursor(e) {
+		var currPos = getCurrentCursorPos(),
+			input = currentHighlightedInput[0],
+			orientation = getCurrentOrientation(input),
+			x = Number(currPos[0]),
+			y = Number(currPos[1]),
+			nextInput;
+		if (e.which == 8) {
+			nextInput = (orientation == "mendatar") ? traverseInput(orientation, x, y, -1) : traverseInput(orientation, x, y, -1);
+			if (nextInput.hasClass("correct")) {
+				nextInput = (orientation == "mendatar") ? traverseInput(orientation, x, y, -2) : traverseInput(orientation, x, y, -2);
+			}
+			$(nextInput).val('');
+		}
+		else if (e.which <= 90 && e.which >= 65) {
+			console.log(String.fromCharCode(e.keyCode), new Date());
+			nextInput = (orientation == "mendatar") ? traverseInput(orientation, x, y, 1) : traverseInput(orientation, x, y, 1);
+			if (nextInput.hasClass("correct")) {
+				nextInput = (orientation == "mendatar") ? traverseInput(orientation, x, y, 2) : traverseInput(orientation, x, y, 2);
+			}
+		}
+		else {
+			nextInput = $("input:focus");
+		}
+		$(nextInput).focus();
+	}
+
+	function traverseInput(orientation, x, y, val) {
+		return (orientation == "mendatar") ? $('td[data-coord="' + (x+val) + ',' + y + '"]').children("input") : $('td[data-coord="' + x + ',' + (y+val) + '"]').children("input");
+
 	}
 
 	function init() {
